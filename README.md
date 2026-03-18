@@ -1,6 +1,7 @@
 # Non-Linear Control of a 2-DOF Robotic Arm
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
 [![MATLAB](https://img.shields.io/badge/MATLAB-Simulink-blue)](https://www.mathworks.com/products/simulink.html)
 [![Arduino](https://img.shields.io/badge/Arduino-Mega_2560-teal)](https://www.arduino.cc/)
 
@@ -12,6 +13,22 @@ Complete design, simulation, and hardware implementation of a non-linear control
   <img src="docs/figures/assembled_prototype.jpg" width="350" alt="Assembled 2-DOF robotic arm prototype" />
 </p>
 <p align="center"><em>Fully assembled 2-DOF robotic arm prototype with 3D-printed PLA+ links, 25GA370 DC gear motors, L298N driver, and Arduino Mega 2560.</em></p>
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Key Results](#key-results)
+- [Hardware](#hardware)
+- [Simulation Results](#simulation-results)
+- [Hardware Design](#hardware-design)
+- [Repository Structure](#repository-structure)
+- [MATLAB Workflow](#matlab-workflow)
+- [Arduino Workflow](#arduino-workflow)
+- [Authors](#authors)
+- [References](#references)
+- [License](#license)
 
 ---
 

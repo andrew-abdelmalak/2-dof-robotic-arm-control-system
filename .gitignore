@@ -1,26 +1,79 @@
-# OS files
+# ========================
+# OS Generated Files
+# ========================
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+Desktop.ini
+__MACOSX/
 
-# MATLAB
+# ========================
+# IDE / Editor
+# ========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# ========================
+# Python
+# ========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.env
+.venv/
+venv/
+
+# ========================
+# MATLAB / Simulink
+# ========================
 *.asv
-*.autosave
-*.m~
-slprj/
 *.slxc
-*.slxp
+*.slx.autosave
+*.slx.r20*
+*.mexa64
+*.mexmaci64
+*.mexw64
+slprj/
+*.mat
+*.m~
 
-# Simulink cache and generated artifacts
-*.mex*
-*.p
-
-# Arduino build outputs
+# ========================
+# Arduino / Embedded
+# ========================
 *.elf
 *.hex
 *.bin
 *.map
 *.o
 *.a
+.pio/
+.pioenvs/
+*.ino.d
+*.ino.cpp
 
-# Temporary logs
+# ========================
+# Logs & Temporary
+# ========================
 *.log
+*.tmp
+*.bak
+
+# ========================
+# Archives
+# ========================
+*.zip
+*.tar.gz
+*.rar
