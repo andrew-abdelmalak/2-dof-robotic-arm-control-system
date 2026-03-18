@@ -1,0 +1,26 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# MATLAB
+*.asv
+*.autosave
+*.m~
+slprj/
+*.slxc
+*.slxp
+
+# Simulink cache and generated artifacts
+*.mex*
+*.p
+
+# Arduino build outputs
+*.elf
+*.hex
+*.bin
+*.map
+*.o
+*.a
+
+# Temporary logs
+*.log
