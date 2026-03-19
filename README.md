@@ -4,6 +4,7 @@
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
 [![MATLAB](https://img.shields.io/badge/MATLAB-Simulink-blue)](https://www.mathworks.com/products/simulink.html)
 [![Arduino](https://img.shields.io/badge/Arduino-Mega_2560-teal)](https://www.arduino.cc/)
+[![CI](https://github.com/andrew-abdelmalak/2-dof-robotic-arm-control-system/actions/workflows/lint.yml/badge.svg)](https://github.com/andrew-abdelmalak/2-dof-robotic-arm-control-system/actions)
 
 Complete design, simulation, and hardware implementation of a non-linear controlled two-degree-of-freedom (2-DOF) planar robotic arm. The project covers mathematical modeling using the Euler–Lagrange formulation, non-linear stability analysis via Lyapunov methods, feedback linearization control synthesis, MATLAB/Simulink simulation, and real-time embedded implementation on an Arduino microcontroller.
 
