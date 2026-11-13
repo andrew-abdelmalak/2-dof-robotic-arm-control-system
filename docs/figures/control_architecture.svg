@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 400" width="960" height="400" role="img" aria-labelledby="arch-title arch-desc">
+  <title id="arch-title">Computed-Torque Control Architecture</title>
+  <desc id="arch-desc">Block diagram of the 2-DOF robotic arm control loop: ModeManager selects position regulation or circular trajectory references, feeds the computed-torque feedback linearization controller, drives the electromechanical DC gear motors and planar 2-DOF Euler-Lagrange arm, and closes the loop via quadrature encoder feedback.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#334155"/>
+    </marker>
+    <marker id="arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#0284C7"/>
+    </marker>
+  </defs>
+
+  <rect width="960" height="400" rx="12" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5"/>
+
+  <!-- Title bar -->
+  <text x="28" y="34" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif" font-size="16" font-weight="700" fill="#0F172A">2-DOF Computed-Torque Feedback Linearization Architecture</text>
+  <text x="28" y="54" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" fill="#475569">Simulink Stateflow (Advanced_trial.slx) and Embedded C++ Control Loop (Ts &gt;= 2 ms)</text>
+
+  <!-- ModeManager / Reference -->
+  <rect x="28" y="92" width="184" height="128" rx="8" fill="#EFF6FF" stroke="#0284C7" stroke-width="1.8"/>
+  <text x="120" y="118" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="700" fill="#0369A1">ModeManager</text>
+  <text x="120" y="138" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" fill="#1E293B">OFF | POS | CIRCLE</text>
+  <line x1="44" y1="150" x2="196" y2="150" stroke="#BAE6FD" stroke-width="1"/>
+  <text x="120" y="170" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-size="11" fill="#334155">POS: step qd = [0.5, 0.5] rad</text>
+  <text x="120" y="188" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-size="11" fill="#334155">CIRCLE: R=0.3 rad, w=0.5</text>
+  <text x="120" y="206" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-size="11" fill="#334155">MCU: cubic / Cartesian IK</text>
+
+  <!-- Arrow: ModeManager -> Controller -->
+  <line x1="212" y1="142" x2="274" y2="142" stroke="#0284C7" stroke-width="2" marker-end="url(#arrow-accent)"/>
+  <text x="243" y="132" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" fill="#0369A1">qd, dqd</text>
+
+  <!-- Computed-Torque Controller -->
+  <rect x="282" y="84" width="236" height="144" rx="8" fill="#FFFFFF" stroke="#0F172A" stroke-width="1.8"/>
+  <text x="400" y="110" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="700" fill="#0F172A">Computed-Torque Controller</text>
+  <text x="400" y="132" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" fill="#334155">v = ddqd + Kd*edot + Kp*e</text>
+  <text x="400" y="152" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" fill="#334155">tau = M(q)v + C(q,dq)dq + G</text>
+  <text x="400" y="172" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" fill="#334155">V = B^-1 (tau + D*dq)</text>
+  <line x1="298" y1="186" x2="502" y2="186" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="400" y="206" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-size="11" fill="#475569">Saturation +/-12 V | Dead-zone V_DEAD</text>
+
+  <!-- Arrow: Controller -> Plant -->
+  <line x1="518" y1="156" x2="584" y2="156" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="551" y="145" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" fill="#0F172A">V (V)</text>
+
+  <!-- Electromechanical Plant -->
+  <rect x="592" y="84" width="236" height="144" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="710" y="110" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="700" fill="#065F46">DC Motors + 2-DOF Plant</text>
+  <text x="710" y="132" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" fill="#1E293B">tau_m = B_mot*V - D_mot*dq</text>
+  <text x="710" y="152" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" fill="#1E293B">ddq = M(q)^-1 (tau_m - C*dq)</text>
+  <line x1="608" y1="168" x2="812" y2="168" stroke="#A7F3D0" stroke-width="1"/>
+  <text x="710" y="188" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-size="11" fill="#065F46">2x 25GA370 (44.727:1) + L298N</text>
+  <text x="710" y="206" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-size="11" fill="#065F46">l1 = l2 = 0.20 m, planar (g = 0)</text>
+
+  <!-- Output arrow -->
+  <line x1="828" y1="156" x2="928" y2="156" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="878" y="145" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" fill="#0F172A">q, dq</text>
+
+  <!-- Feedback sensor box -->
+  <rect x="440" y="284" width="290" height="72" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.8"/>
+  <text x="585" y="308" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="700" fill="#92400E">Quadrature Encoders &amp; Velocity Est.</text>
+  <text x="585" y="328" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" fill="#451A03">44 CPR x 44.727 = 1968 counts/rev</text>
+  <text x="585" y="344" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-size="11" fill="#78350F">q = 2*pi*c/1968 | dq = (q - q_last)/dt</text>
+
+  <!-- Feedback routing lines -->
+  <polyline points="866,156 866,320 738,320" fill="none" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <polyline points="440,320 355,320 355,236" fill="none" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="330" y="264" text-anchor="end" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" fill="#0F172A">q, dq</text>
+</svg>
