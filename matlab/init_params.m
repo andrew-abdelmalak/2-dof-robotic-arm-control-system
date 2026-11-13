@@ -18,8 +18,8 @@ a2 = 5.04e-3;     % m  (link2 COM from joint2)
 %% -------------------------
 % 3) Link masses (SolidWorks -> kg)
 %% -------------------------
-m1_link = 5.14e-3;   % kg (20.14 g)
-m2_link = 5.44e-3;    % kg (8.44 g)
+m1_link = 5.14e-3;   % kg (5.14 g)
+m2_link = 5.44e-3;   % kg (5.44 g)
 
 %% -------------------------
 % 4) Link inertias about part COM (Izz from SW, g*mm^2 -> kg*m^2)
