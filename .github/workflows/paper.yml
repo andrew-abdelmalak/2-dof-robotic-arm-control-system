@@ -1,0 +1,44 @@
+name: Paper
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "paper/**"
+      - ".github/workflows/paper.yml"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "paper/**"
+      - ".github/workflows/paper.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-paper:
+    name: Build LaTeX paper
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install TeX Live packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            latexmk \
+            texlive-latex-base \
+            texlive-latex-recommended \
+            texlive-latex-extra \
+            texlive-science \
+            texlive-fonts-recommended
+
+      - name: Compile IEEE paper PDF
+        working-directory: paper
+        run: |
+          latexmk -pdf -interaction=nonstopmode Nonlinear_Control_2DOF_Arm.tex
+          if grep -E "There were undefined references|Warning.*hyperref" Nonlinear_Control_2DOF_Arm.log; then
+            echo "Paper compile produced undefined references or hyperref warnings"
+            exit 1
+          fi
