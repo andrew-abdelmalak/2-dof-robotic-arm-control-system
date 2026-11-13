@@ -20,12 +20,12 @@
 \textit{German University in Cairo (GUC)}\\
 Cairo, Egypt}
 \and
-\IEEEauthorblockN{Andrew Khalil}
+\IEEEauthorblockN{Andrew Abdelmalak}
 \IEEEauthorblockA{\textit{Dept. of Mechatronics Engineering} \\
 \textit{German University in Cairo (GUC)}\\
 Cairo, Egypt}
 \and
-\IEEEauthorblockN{Hazim Ashraf}
+\IEEEauthorblockN{Hazim Alwakad}
 \IEEEauthorblockA{\textit{Dept. of Mechatronics Engineering} \\
 \textit{German University in Cairo (GUC)}\\
 Cairo, Egypt}
@@ -35,7 +35,7 @@ Cairo, Egypt}
 \textit{German University in Cairo (GUC)}\\
 Cairo, Egypt}
 \and
-\IEEEauthorblockN{Samir Sameh}
+\IEEEauthorblockN{Samir Yacoub}
 \IEEEauthorblockA{\textit{Dept. of Mechatronics Engineering} \\
 \textit{German University in Cairo (GUC)}\\
 Cairo, Egypt}
@@ -49,7 +49,7 @@ Cairo, Egypt}
 \maketitle
 
 \begin{abstract}
-This paper presents the complete design, simulation, and hardware implementation of a non-linear controlled two-degree-of-freedom (2-DOF) planar robotic arm. The work encompasses mathematical modeling using the Euler--Lagrange formulation, non-linear stability analysis via Lyapunov methods, feedback linearization control synthesis, MATLAB/Simulink simulation validation, and real-time embedded implementation on an Arduino microcontroller. The system employs two 25GA370 DC gear motors with integrated quadrature encoders, 3D-printed PLA+ structural links designed in SolidWorks, and an L298N dual H-bridge motor driver. The feedback linearization controller decouples the highly non-linear joint dynamics, achieving accurate trajectory tracking across the workspace. Simulation results demonstrate convergent position regulation with less than 0.01\,rad steady-state error and circular trajectory tracking with phase error below 0.02\,rad. Hardware validation on the physical prototype confirms the practical feasibility of the non-linear control approach for low-cost educational robotic platforms.
+This paper presents the complete design, simulation, and hardware implementation of a non-linear controlled two-degree-of-freedom (2-DOF) planar robotic arm. The work encompasses mathematical modeling using the Euler--Lagrange formulation, non-linear stability analysis via Lyapunov methods, feedback linearization control synthesis, MATLAB/Simulink simulation validation, and real-time embedded implementation on Arduino AVR and ESP32 microcontrollers. The system employs two 25GA370 DC gear motors with integrated quadrature encoders, 3D-printed PLA+ structural links designed in SolidWorks, and an L298N dual H-bridge motor driver. The feedback linearization controller decouples the highly non-linear joint dynamics, achieving accurate trajectory tracking across the workspace. Simulation results demonstrate convergent position regulation with less than 0.01\,rad steady-state error ($0.85$\,s settling time at $K_p = 50, K_d = 10$) and joint-space circular trajectory tracking with phase error below 0.02\,rad and amplitude error below 1\%. Hardware prototyping and bench firmware tests confirm the practical feasibility of the non-linear control approach for low-cost educational robotic platforms.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -183,10 +183,11 @@ A complete non-linear simulation environment was implemented in MATLAB/Simulink 
 
 \subsection{Position Regulation}
 
-The robot was commanded to move from $\mathbf{q}_{init} = [0, 0]$ to $\mathbf{q}_d = [0.5, 0.5]$\,rad. Two gain sets were compared:
+The robot was commanded to move from $\mathbf{q}_{init} = [0, 0]$ to $\mathbf{q}_d = [0.5, 0.5]$\,rad. Lower gains reduce control effort and noise sensitivity at the expense of slower settling, whereas higher gains shorten rise and settling times:
 \begin{itemize}
-\item \textbf{Set~1} $(K_p, K_d) = (5, 1)$: Smooth convergence, overshoot $\sim$0.05\,rad, settling time $\sim$3\,s.
-\item \textbf{Set~2} $(K_p, K_d) = (10, 3)$: Faster response, overshoot $\sim$0.01\,rad, settling time $\sim$1.5\,s.
+\item \textbf{Low Gains} $(K_p, K_d) = (5, 1)$: Lower control effort and noise sensitivity, with prolonged transient oscillation ($\sim 7.6$\,s 2\% settling time in full non-linear simulation).
+\item \textbf{Moderate Gains} $(K_p, K_d) = (10, 3)$: Faster convergence ($2.62$\,s 2\% settling time, $< 10^{-6}$\,rad steady-state error).
+\item \textbf{Tuned Default} $(K_p, K_d) = (50, 10)$ (configured in \texttt{init\_params.m}): Achieves $0.85$\,s 2\% settling time and $3.7 \times 10^{-11}$\,rad steady-state error, with critical damping at $K_d = 2\sqrt{K_p} \approx 14.14$ eliminating overshoot.
 \end{itemize}
 
 Table~\ref{tab:gains} summarizes the trade-offs.
@@ -209,25 +210,25 @@ Robustness & High & Moderate \\
 \end{tabular}
 \end{table}
 
-\subsection{Circular Trajectory Tracking}
+\subsection{Circular Trajectory Tracking (Low Gain)}
 
-The end-effector was commanded to trace a circle of radius $R = 0.3$\,m at $\omega = 0.5$\,rad/s. Fig.~\ref{fig:circle} shows the joint angle tracking performance: measured angles track desired references with phase error $< 0.02$\,rad and amplitude error $< 1\%$.
+In Simulink, the \texttt{circle\_traj} block generates a joint-space circular reference $q_{d1} = R\cos(\omega t)$, $q_{d2} = R\sin(\omega t)$ with $R = 0.3$\,rad and $\omega = 0.5$\,rad/s (setting $\ddot{\mathbf{q}}_d = \mathbf{0}$ in the controller). Fig.~\ref{fig:circle} shows the low-gain circular tracking response: the measured joint angle exhibits an initial transient overshoot peaking near $0.37$\,rad around $t = 1.6$\,s before converging onto the desired sinusoid after $\sim 3$\,s.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\columnwidth]{page7_img1.jpeg}
-\caption{Circular trajectory tracking: measured joint angles (solid) closely follow desired references (dashed) with minimal phase lag after initial transient.}
+\caption{Low-gain circular trajectory tracking in Simulink ($R = 0.3$\,rad, $\omega = 0.5$\,rad/s): measured joint angle (solid) exhibits an initial transient overshoot around $t \approx 1.6$\,s before settling onto the desired sinusoid (dashed).}
 \label{fig:circle}
 \end{figure}
 
-\subsection{Hybrid Mode (Position $\to$ Trajectory)}
+\subsection{Tuned Circular Tracking and Mode Switching}
 
-The full hybrid sequence (OFF $\to$ POS $\to$ CIRCLE) demonstrates seamless mode transitions (Fig.~\ref{fig:hybrid}): position regulation during 1--6\,s followed by smooth transition to circular tracking.
+Under the tuned gains $(K_p, K_d) = (50, 10)$ from \texttt{init\_params.m}, both joints lock onto the desired $R = 0.3$\,rad circular reference within $1.5$\,s (Fig.~\ref{fig:hybrid}), achieving $0.50\%$ steady-state amplitude error ($< 1\%$) and $0.0005$\,rad phase lag ($< 0.02$\,rad). In \texttt{Advanced\_trial.slx}, the \texttt{ModeManager} chart switches between \texttt{OFF}, \texttt{POS}, and \texttt{CIRCLE} modes based on the supervisory mode selector.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\columnwidth]{page8_img1.jpeg}
-\caption{Hybrid mode response showing sequential position regulation (1--6\,s) and circular trajectory tracking (6+\,s). The controller successfully manages mode transitions without destabilizing transients.}
+\caption{Tuned high-gain circular trajectory tracking ($K_p = 50$, $K_d = 10$, $R = 0.3$\,rad, $\omega = 0.5$\,rad/s): both joint angles $q_1, q_2$ (solid) closely follow the desired references (dashed) with $< 1\%$ amplitude error and $< 0.02$\,rad phase lag.}
 \label{fig:hybrid}
 \end{figure}
 
@@ -276,7 +277,7 @@ The mechanical structure was designed in SolidWorks (Fig.~\ref{fig:cad}) followi
 
 \subsection{Hardware Architecture}
 
-The system uses an Arduino Mega 2560 for real-time control, an L298N dual H-bridge for bidirectional motor drive ($V_{supply}$ = 2.5--46\,V, 2\,A continuous per channel), and the integrated quadrature encoders (Fig.~\ref{fig:encoder}) for position feedback at 550 counts/revolution~\cite{mazeika2019}.
+The embedded controller supports both Arduino AVR boards (Mega 2560 / Uno) and ESP32 boards, driving an L298N dual H-bridge for bidirectional motor drive ($V_{supply}$ = 2.5--46\,V, 2\,A continuous per channel)~\cite{mazeika2019}. While the nominal motor specification lists a 50:1 gearbox and 550 counts/rev ($1\times$ single-channel decoding), bench measurement of the 25GA370 units yielded a 44.727:1 gear ratio with 11\,PPR Hall sensors (44\,CPR in $4\times$ quadrature), giving $44 \times 44.727 = 1968$\,counts/rev ($0.183^\circ$/count) in the firmware (Fig.~\ref{fig:encoder}).
 
 \begin{figure}[H]
 \centering
@@ -285,7 +286,7 @@ The system uses an Arduino Mega 2560 for real-time control, an L298N dual H-brid
 \label{fig:encoder}
 \end{figure}
 
-The assembled prototype (Fig.~\ref{fig:prototype}) was verified through open-loop motor tests, encoder calibration (550 CPR confirmed), and closed-loop control execution before experimental testing.
+The assembled prototype (Fig.~\ref{fig:prototype}) was verified through open-loop motor tests, encoder calibration ($44 \times 44.727 = 1968$\,counts/rev), and closed-loop control execution before experimental testing.
 
 \begin{figure}[H]
 \centering
@@ -296,13 +297,13 @@ The assembled prototype (Fig.~\ref{fig:prototype}) was verified through open-loo
 
 \subsection{Embedded Software}
 
-The Arduino firmware implements a fixed-rate control loop ($T_s = 10$\,ms):
+The firmware implements four control sketches (\texttt{joint\_space}, \texttt{end\_effector\_circle} tracing a $R = 0.04$\,m Cartesian circle centered at $(0.18, 0.00)$\,m via analytical inverse kinematics, \texttt{nonlinear\_trajectory}, and \texttt{nonlinear\_trajectory\_alt} executing cubic rest-to-rest polynomials $s(\tau) = 3\tau^2 - 2\tau^3$) with a gated minimum loop period $T_s \ge 2$\,ms (up to 500\,Hz):
 \begin{enumerate}
-\item Read encoder counts, compute joint angles: $q = 2\pi \cdot \text{count} / 550$.
-\item Estimate velocities via filtered finite differences: $\dot{q}_{filt}[k] = 0.7\dot{q}_{filt}[k{-}1] + 0.3\frac{\Delta q}{T_s}$.
-\item Evaluate state machine (OFF/POS/CIRCLE) and generate references.
-\item Execute feedback linearization: compute $\boldsymbol{\tau}_{des}$, convert to PWM voltages.
-\item Apply saturation ($\pm$12\,V) and output to L298N.
+\item Read quadrature encoder counts, compute joint angles: $q = 2\pi \cdot \text{count} / (44.0 \times 44.727)$.
+\item Estimate velocities via finite differences $\Delta q / dt$ (with an optional exponential smoothing filter $\dot{q}_{filt}[k] = 0.7\dot{q}_{filt}[k{-}1] + 0.3\frac{\Delta q}{T_s}$).
+\item Evaluate trajectory references or state transitions (\texttt{MOVE}/\texttt{HOLD}, joint-space circle, or Cartesian IK circle).
+\item Execute computed-torque feedback linearization and Coulomb dead-zone compensation ($V_{\text{dead}} \in [1, 2]$\,V) to mitigate stiction.
+\item Apply $\pm$12\,V saturation and output 8-bit PWM commands to the L298N driver.
 \end{enumerate}
 
 \section{Discussion}
@@ -313,19 +314,19 @@ The Arduino firmware implements a fixed-rate control loop ($T_s = 10$\,ms):
 The feedback linearization controller successfully:
 \begin{itemize}
 \item Decouples the non-linear joint dynamics as predicted by theory.
-\item Achieves convergent position regulation ($< 0.01$\,rad steady-state error).
-\item Tracks circular trajectories with $< 0.02$\,rad phase error.
+\item Achieves convergent position regulation ($< 0.01$\,rad steady-state error, $0.85$\,s settling time at $K_p = 50, K_d = 10$).
+\item Tracks joint-space circular trajectories ($R = 0.3$\,rad, $\omega = 0.5$\,rad/s) with $< 1\%$ amplitude error ($0.50\%$) and $< 0.02$\,rad phase error ($0.0005$\,rad).
 \item Maintains bounded control effort within $\pm$12\,V actuator limits.
 \end{itemize}
 
-Lie-bracket controllability analysis confirmed rank$(V(\mathbf{x})) = 4$ across the entire workspace, verifying that no singular configurations exist.
+Lie-bracket controllability analysis confirmed rank$(V(\mathbf{x})) = 4$ across all $120 \times 120 = 14{,}400$ workspace grid points on $[-\pi, \pi]^2$ (0 singular configurations, minimum singular value $\sigma_{\min} = 322.29$), verifying that no singular configurations exist.
 
 \subsection{Hardware Discrepancy Sources}
 
 Differences between simulation and hardware behavior arise from:
 \begin{itemize}
-\item Gearbox friction and backlash (not modeled).
-\item Encoder quantization ($0.65^{\circ}$/count angular resolution).
+\item Gearbox friction, stiction, and backlash (partially mitigated in firmware via dead-zone compensation).
+\item Encoder quantization ($0.183^{\circ}$/count in $4\times$ quadrature, $0.65^{\circ}$/count in $1\times$ mode).
 \item PWM resolution limitations (8-bit, 256 levels).
 \item Unmodeled structural compliance in 3D-printed links.
 \end{itemize}
@@ -347,7 +348,7 @@ This paper presented a complete non-linear control implementation for a 2-DOF pl
 \item Successful derivation and validation of the Euler--Lagrange dynamic model with DC motor electromechanical coupling.
 \item Feedback linearization controller achieving convergent trajectory tracking with proven Lyapunov stability.
 \item Demonstration of position regulation, circular trajectory tracking, and hybrid mode operation in MATLAB/Simulink.
-\item Construction and verification of a physical prototype using commercially available components (25GA370 motors, L298N driver, Arduino Mega 2560).
+\item Construction and verification of a physical prototype using commercially available components (25GA370 motors, L298N driver, Arduino AVR / ESP32 controllers).
 \end{enumerate}
 
 Future work includes friction compensation, adaptive control for parameter uncertainty, higher-resolution encoders, and extended workspace operation with obstacle avoidance.
