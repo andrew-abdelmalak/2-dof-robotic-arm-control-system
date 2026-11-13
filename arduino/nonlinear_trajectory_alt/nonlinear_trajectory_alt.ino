@@ -1,19 +1,49 @@
 #include <Arduino.h>
 
-/* ===================== PINS ===================== */
-// -------- Joint 1 --------
+/* ===================== BOARD COMPATIBILITY ===================== */
+#if defined(ARDUINO_ARCH_ESP32)
+// -------- Joint 1 (ESP32) --------
 #define ENC1_A 32
 #define ENC1_B 33
 #define IN1_1  12
 #define IN2_1  14
 #define ENA_1  13
 
-// -------- Joint 2 --------
+// -------- Joint 2 (ESP32) --------
 #define ENC2_A 18
 #define ENC2_B 19
 #define IN1_2  25
 #define IN2_2  26
 #define ENA_2  27
+#else
+// AVR fallback (Arduino Mega 2560)
+#define IRAM_ATTR
+#define ENC1_A 2
+#define ENC1_B 3
+#define IN1_1  8
+#define IN2_1  9
+#define ENA_1  10
+
+#define ENC2_A 18
+#define ENC2_B 19
+#define IN1_2  6
+#define IN2_2  7
+#define ENA_2  5
+
+static int avrPwmPin[2] = {ENA_1, ENA_2};
+static inline void ledcSetup(int, int, int) {}
+static inline void ledcAttachPin(int pin, int ch) {
+  pinMode(pin, OUTPUT);
+  if (ch >= 0 && ch < 2) {
+    avrPwmPin[ch] = pin;
+  }
+}
+static inline void ledcWrite(int ch, int duty) {
+  if (ch >= 0 && ch < 2) {
+    analogWrite(avrPwmPin[ch], duty);
+  }
+}
+#endif
 
 /* ===================== PWM ===================== */
 #define PWM_FREQ 20000
@@ -80,10 +110,10 @@ void setup() {
   pinMode(ENC1_A,INPUT_PULLUP); pinMode(ENC1_B,INPUT_PULLUP);
   pinMode(ENC2_A,INPUT_PULLUP); pinMode(ENC2_B,INPUT_PULLUP);
 
-  attachInterrupt(ENC1_A, isr1A, CHANGE);
-  attachInterrupt(ENC1_B, isr1B, CHANGE);
-  attachInterrupt(ENC2_A, isr2A, CHANGE);
-  attachInterrupt(ENC2_B, isr2B, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(ENC1_A), isr1A, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(ENC1_B), isr1B, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(ENC2_A), isr2A, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(ENC2_B), isr2B, CHANGE);
 
   ledcSetup(PWM_CH1, PWM_FREQ, PWM_RES);
   ledcSetup(PWM_CH2, PWM_FREQ, PWM_RES);
