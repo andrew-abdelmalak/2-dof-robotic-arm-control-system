@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  lint-test-build:
+    name: Lint, test, and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+
+      - name: Sync dependencies
+        run: uv sync --frozen
+
+      - name: Lint and format check
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+
+      - name: Run Python test suite
+        run: uv run pytest -v
+
+      - name: Run numerical verification CLI
+        run: uv run python -m arm_control
+
+      - name: Install GNU Octave
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends octave
+
+      - name: Verify MATLAB/Octave scripts
+        run: |
+          octave --no-gui --eval "addpath('matlab'); check_controllability; check_nonlinear_controllability_lie"
+
+      - name: Install Arduino CLI
+        uses: arduino/setup-arduino-cli@81d310742121c928ea9c8bbd407b4217b432ae02 # v2.0.0
+
+      - name: Compile all Arduino sketches for Mega 2560
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install arduino:avr
+          for sketch in arduino/end_effector_circle arduino/joint_space arduino/nonlinear_trajectory arduino/nonlinear_trajectory_alt; do
+            echo "Compiling $sketch..."
+            arduino-cli compile --fqbn arduino:avr:mega "$sketch"
+          done

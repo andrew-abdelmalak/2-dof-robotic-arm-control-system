@@ -1,19 +1,49 @@
 #include <Arduino.h>
 
-/* ===================== PINS ===================== */
-// Motor 1
+/* ===================== BOARD COMPATIBILITY ===================== */
+#if defined(ARDUINO_ARCH_ESP32)
+// Motor 1 (ESP32)
 #define ENC1_A 34
 #define ENC1_B 35
 #define IN1_1  25
 #define IN2_1  26
 #define ENA_1  27
 
-// Motor 2
+// Motor 2 (ESP32)
 #define ENC2_A 32
 #define ENC2_B 33
 #define IN1_2  14
 #define IN2_2  12
 #define ENA_2  13
+#else
+// AVR fallback (Arduino Mega 2560)
+#define IRAM_ATTR
+#define ENC1_A 2
+#define ENC1_B 3
+#define IN1_1  8
+#define IN2_1  9
+#define ENA_1  10
+
+#define ENC2_A 18
+#define ENC2_B 19
+#define IN1_2  6
+#define IN2_2  7
+#define ENA_2  5
+
+static int avrPwmPin[2] = {ENA_1, ENA_2};
+static inline void ledcSetup(int, int, int) {}
+static inline void ledcAttachPin(int pin, int ch) {
+  pinMode(pin, OUTPUT);
+  if (ch >= 0 && ch < 2) {
+    avrPwmPin[ch] = pin;
+  }
+}
+static inline void ledcWrite(int ch, int duty) {
+  if (ch >= 0 && ch < 2) {
+    analogWrite(avrPwmPin[ch], duty);
+  }
+}
+#endif
 
 /* ===================== PWM ===================== */
 #define PWM_FREQ 20000
@@ -104,11 +134,11 @@ void setup() {
   ledcAttachPin(ENA_1, PWM_CH1);
   ledcAttachPin(ENA_2, PWM_CH2);
 
-  attachInterrupt(ENC1_A, isrEnc1A, CHANGE);
-  attachInterrupt(ENC1_B, isrEnc1B, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(ENC1_A), isrEnc1A, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(ENC1_B), isrEnc1B, CHANGE);
 
   /* --- SENSITIVITY FIX APPLIED HERE --- */
-  attachInterrupt(ENC2_A, isrEnc2A, RISING);
+  attachInterrupt(digitalPinToInterrupt(ENC2_A), isrEnc2A, RISING);
 
   lastMicros = micros();
 
